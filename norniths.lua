@@ -34,7 +34,7 @@ reseed_display_timer=0
 
 engine.name='Nornith'
 MusicUtil = require "musicutil"
-include('p8/lib/p8')
+include('lib/p8')
 
 function set_d(t) 
   decay = (t-1)/8 + 0.05 
