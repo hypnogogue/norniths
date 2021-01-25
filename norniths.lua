@@ -13,6 +13,7 @@
 -- gfx based on tweetcart
 -- by @alexis_lessard/@eigen
 -- norns adaption by @shoggoth
+-- v1.0.1
 
 
 scale  = { {0,2,4,7,9}, {0,2,4,5,7,9,11} }
@@ -27,9 +28,9 @@ dev = true
 attack_type = 2
 screen.aa(1)
 ghost_num=2
-note_history = {}
 clock_display_timer=0
 reseed_display_timer=0
+ghost_num_disp_timer =0
 
 
 engine.name='Nornith'
@@ -90,11 +91,9 @@ function play(out,ix)
    --- output[out].volts = nn/12 + oct
    note_num = util.clamp(nn + oct + 70,0,127)
   -- print('note_num '..note_num)
-  note_history[note_num]=1
    local freq = MusicUtil.note_num_to_freq(note_num)
   -- print('freq'..freq)
    engine.hz(freq)
-  -- redraw(note_num,out)
   end
   step[ix] = (step[ix] % length[ix]) + 1
   step[ix+2] = (step[ix+2] % length[ix+2]) + 1
@@ -214,7 +213,7 @@ function enc(n, delta)
       if alt==false then
       if params:get("clock_tempo") <=5 and delta < 0 then return end  
       params:delta("clock_tempo", delta)
-      clock_display_timer=20
+      clock_display_timer=params:get("clock_tempo")
       else
         step_div=util.clamp(step_div-delta,1,16)
         play_cnt=0
@@ -222,9 +221,9 @@ function enc(n, delta)
   elseif n==3 then
     in_2_sim = util.clamp(in_2_sim+(delta*0.1),-7,7)
     ghost_num = util.clamp(math.floor(math.abs(in_2_sim*3)),2,20)
-    print(ghost_num)
+    --print(ghost_num)
     cls()
-    ghost_setup()
+    ghost_num_disp_timer = 30
   end
 end
 
@@ -237,14 +236,14 @@ function ghost_setup()
   k=127
   tt=0
   p={}
-  n=ghost_num
+  n=20
   r=rnd
   
   for i=1,n do
    -- NB: color/level adjustment for stronger contrast
    -- p[i]={r(k),r(171),1+r(n)/20,5+5*i}
    local col = flr(1+(i-1) * 15 / n)
-   p[i]={r(k),r(171),1+r(n)/20,col}
+   p[i]={r(k),r(100),1+r(n)/20,col}
   end
 end
 
@@ -254,11 +253,12 @@ function redraw()
  if attack_type ~= 3 then --trails for smear-y notes
      cls()
   end
- for j=1,n do
+ for j=1,ghost_num do
   o=p[j]
   h=o[3]*tt+j/9
   x=o[1]+sin(h)*20
-  y=-20+(o[2]-tt*99)%171
+  --y=-20+(o[2]-tt*99)%171
+  y=-20+(o[2]-tt*99)%100
   for i=0,3 do
    circfill(x+sin(h-i/9)*i,y+1+i*2,6-i,o[4])
    circfill(x+sin(h-i/9)*i,y+i*2,6-i,o[4])
@@ -287,17 +287,14 @@ function redraw()
       circfill(math.random(30,90),math.random(25,35),5,0)
       reseed_display_timer = reseed_display_timer-1
     end
-      
+    if ghost_num_disp_timer > 0 then
+      circfill(in_2_sim < 0 and 0 or 128,0,ghost_num,1)
+      circ(in_2_sim < 0 and 0 or 128,0,ghost_num+2,15)
+      ghost_num_disp_timer = ghost_num_disp_timer-1
+    end
   end
  flip()
  tt = tt + 0.01
- --print(tablelength(note_history))
-end
-
-function tablelength(T)
-  local count = 0
-  for _ in pairs(T) do count = count + 1 end
-  return count
 end
   
   
