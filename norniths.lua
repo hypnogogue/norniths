@@ -13,7 +13,7 @@
 -- gfx based on tweetcart
 -- by @alexis_lessard/@eigen
 -- norns adaption by @shoggoth
--- v1.0.2
+-- v1.0.1
 
 
 scale  = { {0,2,4,7,9}, {0,2,4,5,7,9,11} }
@@ -36,7 +36,6 @@ ghost_num_disp_timer =0
 engine.name='Nornith'
 MusicUtil = require "musicutil"
 include('lib/p8')
-include('lib/engine_norniths_params')
 
 function set_d(t) 
   decay = (t-1)/8 + 0.05 
